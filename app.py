@@ -154,11 +154,12 @@ def generate_title_endpoint():
             "bertscore": bertscore_f1 # This will be null if no reference was provided
         })
 
-    except Exception as e:*:
+    except Exception as e:
         print(f"Error in /generate_title: {e}")
         return jsonify({"error": f"Internal server error: {e}"}), 500
 
 # --- 4. Run the Application ---
 if __name__ == '__main__':
     print("Starting Flask server... Open http://127.0.0.1:5000 in your browser.")
+
     app.run(debug=True)
