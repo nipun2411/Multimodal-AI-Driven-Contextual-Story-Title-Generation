@@ -1,0 +1,174 @@
+/* --- Basic Setup --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+h1 {
+    color: #005088; /* From your presentation */
+    text-align: center;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 15px;
+}
+h2 { color: #005088; }
+h3 { color: #1e293b; }
+
+/* --- Buttons --- */
+button {
+    background-color: #005088;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+button:hover { background-color: #003d66; }
+button:disabled { background-color: #aaa; cursor: not-allowed; }
+
+#sampleBtn { background-color: #11caa0; } /* Teal from presentation */
+#sampleBtn:hover { background-color: #0d9a7b; }
+
+.generate-container, .sample-container {
+    text-align: center;
+    margin: 25px 0;
+}
+
+/* --- (FR1) Input Interface --- */
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+textarea, input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 14px;
+    box-sizing: border-box; /* Important for width */
+}
+input[type="file"] { padding: 7px; }
+textarea { resize: vertical; }
+
+.preview-box {
+    width: 100%;
+    height: 250px;
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: #fafafa;
+}
+#imagePreview {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+#previewPlaceholder {
+    color: #999;
+    font-style: italic;
+}
+
+/* --- (FR5) Result Display --- */
+.results-container {
+    margin-top: 30px;
+    border-top: 2px solid #e0e0e0;
+    padding-top: 20px;
+}
+.result-item {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.result-item p {
+    font-size: 18px;
+    font-weight: 500;
+    color: #11caa0;
+}
+
+/* Score Gauge / Progress Bar */
+.score-gauge {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 15px;
+    height: 30px;
+    position: relative;
+    overflow: hidden;
+}
+.score-bar {
+    height: 100%;
+    background-color: #d9534f; /* Fail color (red) */
+    border-radius: 15px;
+    transition: width 0.5s ease-in-out;
+}
+/* Pass state (≥ 0.85) */
+.score-bar.pass {
+    background-color: #5cb85c; /* Pass color (green) */
+}
+.score-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #333;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 1px 1px 2px white;
+}
+#scoreStatus { font-weight: bold; }
+
+/* --- (FR6) Error & Loader --- */
+.error-container {
+    color: #d9534f;
+    background: #f2dede;
+    border: 1px solid #d9534f;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #005088;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-left: 10px;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .input-grid {
+        grid-template-columns: 1fr;
+    }
+}

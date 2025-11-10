@@ -1,0 +1,205 @@
+// Wait for the entire HTML document to be loaded before running script
+document.addEventListener("DOMContentLoaded", () => {
+
+    // --- 1. Get DOM Elements ---
+    // Buttons
+    const sampleBtn = document.getElementById("sampleBtn");
+    const generateBtn = document.getElementById("generateBtn");
+    
+    // Inputs
+    const storyText = document.getElementById("storyText");
+    const imageUpload = document.getElementById("imageUpload");
+    const referenceTitle = document.getElementById("referenceTitle"); // Hidden input
+    
+    // Preview
+    const imagePreview = document.getElementById("imagePreview");
+    const previewPlaceholder = document.getElementById("previewPlaceholder");
+    
+    // Results
+    const loader = document.getElementById("loader");
+    const resultsDiv = document.getElementById("results");
+    const generatedTitle = document.getElementById("generatedTitle");
+    const scoreBox = document.getElementById("scoreBox");
+    const scoreBar = document.getElementById("scoreBar");
+    const scoreText = document.getElementById("scoreText");
+    const scoreStatus = document.getElementById("scoreStatus");
+    const errorDiv = document.getElementById("error");
+
+    // --- 2. Event Listeners ---
+    
+    // (FR7) Load Sample Button
+    sampleBtn.addEventListener("click", loadSample);
+    
+    // (FR1) Image Upload Preview
+    imageUpload.addEventListener("change", previewImage);
+    
+    // (FR2) Generate Title Button
+    generateBtn.addEventListener("click", generateTitle);
+
+    // --- 3. Core Functions ---
+
+    /**
+     * (FR1) Handles previewing the image when a user uploads a file.
+     */
+    function previewImage() {
+        const file = imageUpload.files[0];
+        if (file) {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                // Set the image source to the Base64 Data URL
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = "block";
+                previewPlaceholder.style.display = "none";
+            };
+            
+            // Read the file as a Data URL (Base64)
+            reader.readAsDataURL(file);
+        }
+    }
+
+    /**
+     * (FR7) Fetches a random sample from the backend /get_sample endpoint.
+     */
+    async function loadSample() {
+        setLoading(true);
+        try {
+            const response = await fetch("/get_sample");
+            if (!response.ok) {
+                throw new Error("Failed to fetch sample from server.");
+            }
+            const data = await response.json();
+            
+            // Populate the inputs with the sample data
+            storyText.value = data.story_text;
+            referenceTitle.value = data.reference_title; // Store reference for scoring
+            imagePreview.src = data.image_base64; // Set preview from Base64
+            
+            // Show the preview
+            imagePreview.style.display = "block";
+            previewPlaceholder.style.display = "none";
+            
+            // Clear any old results or errors
+            clearResults();
+            
+        } catch (err) {
+            showError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    /**
+     * (FR2) Main function to generate the title.
+     * Sends the input data to the backend /generate_title endpoint.
+     */
+    async function generateTitle() {
+        // --- (FR6) Input Validation ---
+        const text = storyText.value;
+        const imageSrc = imagePreview.src;
+        const refTitle = referenceTitle.value;
+
+        if (!text || !imageSrc || imageSrc.startsWith("http")) { // Check if image is loaded
+            showError("Please provide both story text and an image.");
+            return;
+        }
+
+        setLoading(true);
+        clearResults();
+
+        try {
+            // --- Call the Backend API ---
+            const response = await fetch("/generate_title", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    story_text: text,
+                    image_base64: imageSrc, // Send the Base64 string
+                    reference_title: refTitle // Send ref title (may be empty)
+                }),
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || "Generation failed.");
+            }
+            
+            const data = await response.json();
+            displayResults(data.generated_title, data.bertscore);
+
+        } catch (err) {
+            showError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    /**
+     * (FR5) Displays the results from the backend.
+     * @param {string} title - The title generated by the model.
+     * @param {number | null} score - The BERTScore F1, or null.
+     */
+    function displayResults(title, score) {
+        // Show the generated title
+        generatedTitle.textContent = title;
+        resultsDiv.style.display = "block";
+
+        // (FR3) Display score only if it was calculated
+        if (score !== null) {
+            const scorePercent = (score * 100).toFixed(2);
+            const didPass = score >= 0.85;
+
+            scoreText.textContent = `${scorePercent}% (F1 Score)`;
+            scoreBar.style.width = `${scorePercent}%`;
+            
+            // Add/remove 'pass' class for styling
+            scoreBar.classList.toggle("pass", didPass);
+
+            scoreStatus.textContent = didPass 
+                ? "Pass (≥ 85%) - Strong semantic alignment!"
+                : "Fail (< 85%) - Weak semantic alignment.";
+            
+            scoreBox.style.display = "block";
+        }
+    }
+
+    // --- 4. Utility Functions ---
+
+    /**
+     * Toggles the loading spinner and disables buttons.
+     * @param {boolean} isLoading - Whether to show the loading state.
+     */
+    function setLoading(isLoading) {
+        if (isLoading) {
+            loader.style.display = "inline-block";
+            generateBtn.disabled = true;
+            sampleBtn.disabled = true;
+        } else {
+            loader.style.display = "none";
+            generateBtn.disabled = false;
+            sampleBtn.disabled = false;
+        }
+    }
+
+    /**
+     * (FR6) Shows an error message to the user.
+     * @param {string} message - The error message to display.
+     */
+    function showError(message) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = "block";
+    }
+
+    /**
+     * Clears old results and errors from the UI.
+     */
+    function clearResults() {
+        errorDiv.style.display = "none";
+        resultsDiv.style.display = "none";
+        scoreBox.style.display = "none";
+        generatedTitle.textContent = "---";
+        scoreBar.style.width = "0%";
+        scoreText.textContent = "";
+        scoreStatus.textContent = "";
+    }
+});
