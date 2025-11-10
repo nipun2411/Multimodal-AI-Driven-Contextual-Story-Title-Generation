@@ -17,6 +17,10 @@ The app is built with a **Flask/Python** backend and **Vanilla HTML/CSS/JavaScri
 * **Frontend:** Vanilla HTML, CSS, JavaScript (no frameworks)
 * **Model:** `Salesforce/blip-image-captioning-base`
 
+## Result Heatmap
+<img width="956" height="621" alt="image" src="https://github.com/user-attachments/assets/8e76f013-bb2d-45b1-a67f-d46d817ff3d8" />
+
+
 ## Setup
 
 1.  **Clone the repository** (or copy these files into a new project folder).
