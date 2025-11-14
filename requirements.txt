@@ -1,8 +1,0 @@
-flask
-transformers
-torch
-Pillow
-evaluate
-bert_score
-datasets
-python-dotenv
